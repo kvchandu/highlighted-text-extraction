@@ -109,12 +109,13 @@ def snap_page(img):
 
     # Close the display window
     cv.destroyAllWindows()  
+    return final
 
 
 
 img = cv.imread('page-3.jpeg')
 
-snap_page(img)
+img = snap_page(img)
 # Convert BGR to HSV
 
 hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
@@ -126,11 +127,7 @@ mask_yellow = cv.inRange(hsv, yellow_lower, yellow_upper)
 
 yellow_output = cv.bitwise_and(img, img, mask=mask_yellow)
 
-
-
-
-
-cv.imshow('Image', img)
+cv.imshow('Image', yellow_output)
 
 # Wait for a key press
 cv.waitKey(0)
