@@ -21,6 +21,25 @@ def order_points(pts):
     # Return the ordered coordinates.
     return rect.astype('int').tolist()
 
+
+"""
+Given a mask on an image and the image, returns the rectangular region enclosing the mask. 
+"""
+def extract_box(img, mask):
+    indices = np.argwhere(mask > 0)
+    mins = np.min(indices, axis=0)
+    min_x = mins[0]
+    min_y = mins[1]
+
+    maxs = np.max(indices, axis=0)
+    max_x = maxs[0]
+    max_y = maxs[1]
+
+    return img[ min_x - 10 : max_x + 10, min_y - 10: max_y + 10,]
+    
+
+   #print(indices[0])
+
 def snap_page(img):
     orig_img = img
     # Repeated Closing operation to remove text from the document.
@@ -115,7 +134,7 @@ def snap_page(img):
 
 img = cv.imread('page-3.jpeg')
 
-img = snap_page(img)
+img = cv.rotate(snap_page(img), cv.ROTATE_90_COUNTERCLOCKWISE)
 # Convert BGR to HSV
 
 hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
@@ -125,9 +144,13 @@ yellow_lower = np.array([20, 100, 100])
 yellow_upper = np.array([30, 255, 255])
 mask_yellow = cv.inRange(hsv, yellow_lower, yellow_upper)
 
-yellow_output = cv.bitwise_and(img, img, mask=mask_yellow)
 
-cv.imshow('Image', yellow_output)
+yellow_output = cv.bitwise_and(img, img, mask=mask_yellow)
+final = extract_box(img, yellow_output)
+
+
+#yellow_output = cv.dilate(yellow_output,cv.getStructuringElement(cv.MORPH_ELLIPSE, (3, 3)))
+cv.imshow('Image', final)
 
 # Wait for a key press
 cv.waitKey(0)
