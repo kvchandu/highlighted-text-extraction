@@ -2,6 +2,11 @@ import cv2 as cv
 import numpy as np
 from matplotlib import pyplot as plt
 
+import pytesseract
+from PIL import Image
+
+pytesseract.pytesseract.tesseract_cmd = r"/opt/local/bin/tesseract"
+
 def order_points(pts):
     '''Rearrange coordinates to order:
       top-left, top-right, bottom-right, bottom-left'''
@@ -140,17 +145,40 @@ img = cv.rotate(snap_page(img), cv.ROTATE_90_COUNTERCLOCKWISE)
 hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
 
 # Range for upper range
-yellow_lower = np.array([20, 100, 100])
-yellow_upper = np.array([30, 255, 255])
+yellow_lower = np.array([10, 100, 100])
+yellow_upper = np.array([40, 255, 255])
 mask_yellow = cv.inRange(hsv, yellow_lower, yellow_upper)
 
 
 yellow_output = cv.bitwise_and(img, img, mask=mask_yellow)
+
+cv.imshow('Image', yellow_output)
+
+# Wait for a key press
+cv.waitKey(0)
+
+# Close the display window
+cv.destroyAllWindows()
+
 final = extract_box(img, yellow_output)
+
+# Convert image to grayscale
+gray = cv.cvtColor(final, cv.COLOR_BGR2GRAY)
+
+# # Apply thresholding to convert image to binary
+thresh = 170
+gray = cv.threshold(gray, thresh, 255, cv.THRESH_BINARY)[1]
+
+# Resize image
+gray = cv.resize(gray, (800, 800))
+
+
+text = pytesseract.image_to_string(gray)
+print(text)
 
 
 #yellow_output = cv.dilate(yellow_output,cv.getStructuringElement(cv.MORPH_ELLIPSE, (3, 3)))
-cv.imshow('Image', final)
+cv.imshow('Image', gray)
 
 # Wait for a key press
 cv.waitKey(0)
